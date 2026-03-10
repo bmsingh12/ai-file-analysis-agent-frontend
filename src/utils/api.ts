@@ -1,14 +1,7 @@
+import { AskResponse } from "@/app/lib/AskResponse";
+import { UploadResponse } from "@/app/lib/UploadResponse";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "http://localhost:8000";
-
-// Types for responses
-export interface UploadResponse {
-  filename: string;
-  chunks_created: number;
-}
-
-export interface AskResponse {
-  answer: string;
-}
 
 function buildApiUrl(path: string): string {
   return `${API_URL}${path}`;

@@ -5,7 +5,9 @@ import type { SubmitEventHandler } from 'react';
 
 import { AskSection } from "@/src/components/AskSection";
 import { FileUploadSection } from "@/src/components/FileUploadSection";
-import { uploadFile, askQuestion, UploadResponse, AskResponse } from "../src/utils/api";
+import { uploadFile, askQuestion } from "../src/utils/api";
+import { UploadResponse } from "./lib/UploadResponse";
+import { AskResponse } from "./lib/AskResponse";
 
 export default function HomePage() {
   const [file, setFile] = useState<File | null>(null);

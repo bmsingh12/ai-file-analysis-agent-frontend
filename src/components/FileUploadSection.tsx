@@ -1,8 +1,7 @@
 "use client";
 
+import { UploadResponse } from "@/app/lib/UploadResponse";
 import type { ChangeEventHandler, FormEventHandler } from "react";
-
-import type { UploadResponse } from "@/src/utils/api";
 
 interface FileUploadSectionProps {
   file: File | null;
