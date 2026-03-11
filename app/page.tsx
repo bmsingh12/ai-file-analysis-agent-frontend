@@ -4,6 +4,7 @@ import { createSession, askQuestion, uploadFile } from "../src/utils/api";
 import type { ChatMessage } from "@/app/lib/ChatMessage";
 import type { UploadResponse } from "@/app/lib/UploadResponse";
 import { FileUploadSection } from "@/src/components/FileUploadSection";
+import { SourceCitations } from "@/src/components/SourceCitations";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEventHandler, FormEventHandler } from "react";
 
@@ -177,10 +178,7 @@ export default function HomePage() {
 
                   return (
                     <div
-                      key={`${message.role}-${index}-${message.content.slice(
-                        0,
-                        20,
-                      )}`}
+                      key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
                       className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                     >
                       <div
@@ -193,9 +191,14 @@ export default function HomePage() {
                         <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">
                           {isUser ? "You" : "AI"}
                         </div>
+
                         <p className="whitespace-pre-wrap leading-6">
                           {message.content}
                         </p>
+
+                        {!isUser ? (
+                          <SourceCitations sources={message.sources} />
+                        ) : null}
                       </div>
                     </div>
                   );
