@@ -5,24 +5,22 @@ import type { SourceCitation } from "@/app/lib/SourceCitation";
 
 interface SourceCitationsProps {
   sources?: SourceCitation[] | null;
+  onSourceClick?: (source: SourceCitation) => void;
 }
 
 function truncateSource(content: string, maxLength = 180): string {
   const normalized = content.replace(/\s+/g, " ").trim();
-
-  if (normalized.length <= maxLength) {
-    return normalized;
-  }
-
+  if (normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-export function SourceCitations({ sources }: SourceCitationsProps) {
+export function SourceCitations({
+  sources,
+  onSourceClick,
+}: SourceCitationsProps) {
   const [isOpen, setIsOpen] = useState(true);
 
-  if (!sources || sources.length === 0) {
-    return null;
-  }
+  if (!sources || sources.length === 0) return null;
 
   return (
     <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -67,21 +65,16 @@ export function SourceCitations({ sources }: SourceCitationsProps) {
         <div className="overflow-hidden">
           <div className="space-y-3">
             {sources.map((source, index) => (
-              <div
-                key={`${source.filename ?? "unknown"}-${
-                  source.chunk_index ?? index
-                }`}
-                className="rounded-2xl border border-white/10 bg-black/20 p-3 text-xs text-stone-300"
+              <button
+                key={`${source.filename ?? "unknown"}-${source.chunk_index ?? index}`}
+                type="button"
+                onClick={() => onSourceClick?.(source)}
+                className="block w-full rounded-2xl border border-white/10 bg-black/20 p-3 text-left text-xs text-stone-300 transition hover:border-cyan-300/40 hover:bg-black/30 cursor-pointer"
               >
                 <div className="mb-2 flex flex-wrap gap-2 text-[11px] text-cyan-200">
                   <span>{source.filename ?? "Unknown file"}</span>
-
-                  {source.page !== null && source.page !== undefined ? (
-                    <span>Page {source.page}</span>
-                  ) : null}
-
-                  {source.chunk_index !== null &&
-                  source.chunk_index !== undefined ? (
+                  {source.page != null ? <span>Page {source.page}</span> : null}
+                  {source.chunk_index != null ? (
                     <span>Chunk {source.chunk_index}</span>
                   ) : null}
                 </div>
@@ -89,7 +82,7 @@ export function SourceCitations({ sources }: SourceCitationsProps) {
                 <p className="whitespace-pre-wrap text-stone-300">
                   {truncateSource(source.content)}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
