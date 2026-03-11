@@ -207,8 +207,26 @@ export default function HomePage() {
 
               {asking && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-stone-300 shadow-lg">
-                    AI is thinking...
+                  <div className="flex max-w-[85%] items-end gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-stone-300 shadow-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-300/20 text-[11px] font-semibold uppercase tracking-wide text-cyan-200">
+                      AI
+                    </div>
+
+                    <div className="min-w-30">
+                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                        Thinking
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
+                        <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
+                        <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
+                      </div>
+
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full w-1/2 animate-pulse rounded-full bg-cyan-300/70" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
