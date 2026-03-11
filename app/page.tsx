@@ -1,6 +1,6 @@
 "use client";
 
-import { createSession, askQuestion, uploadFile } from "../src/utils/api";
+import { createSession, streamAskQuestion, uploadFile } from "../src/utils/api";
 import type { ChatMessage } from "@/app/lib/ChatMessage";
 import type { UploadResponse } from "@/app/lib/UploadResponse";
 import type { SourceCitation } from "@/app/lib/SourceCitation";
@@ -11,8 +11,9 @@ import type { ChangeEventHandler, FormEventHandler } from "react";
 import dynamic from "next/dynamic";
 
 const DocumentViewer = dynamic(
-  () => import("@/src/components/DocumentViewer").then((mod) => mod.DocumentViewer),
-  { ssr: false }
+  () =>
+    import("@/src/components/DocumentViewer").then((mod) => mod.DocumentViewer),
+  { ssr: false },
 );
 
 export default function HomePage() {
@@ -134,25 +135,61 @@ export default function HomePage() {
         content: currentQuestion,
         sources: null,
       },
+      {
+        role: "assistant",
+        content: "",
+        sources: null,
+      },
     ]);
 
     try {
-      const response = await askQuestion({
-        session_id: sessionId,
-        question: currentQuestion,
-      });
+      await streamAskQuestion(
+        {
+          session_id: sessionId,
+          question: currentQuestion,
+        },
+        (event) => {
+          if (event.type === "token") {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const lastAssistantIndex = [...updated]
+                .map((message, index) => ({ message, index }))
+                .reverse()
+                .find((entry) => entry.message.role === "assistant")?.index;
 
-      setMessages(response.messages);
+              if (lastAssistantIndex === undefined) {
+                return updated;
+              }
 
-      const latestAssistantMessage = [...response.messages]
-        .reverse()
-        .find(
-          (message) => message.role === "assistant" && message.sources?.length,
-        );
+              updated[lastAssistantIndex] = {
+                ...updated[lastAssistantIndex],
+                content: `${updated[lastAssistantIndex].content}${event.content}`,
+              };
 
-      if (latestAssistantMessage?.sources?.length) {
-        setSelectedSource(latestAssistantMessage.sources[0]);
-      }
+              return updated;
+            });
+          }
+
+          if (event.type === "done") {
+            setMessages(event.messages);
+
+            const latestAssistantMessage = [...event.messages]
+              .reverse()
+              .find(
+                (message) =>
+                  message.role === "assistant" && message.sources?.length,
+              );
+
+            if (latestAssistantMessage?.sources?.length) {
+              setSelectedSource(latestAssistantMessage.sources[0]);
+            }
+          }
+
+          if (event.type === "error") {
+            setError(event.detail);
+          }
+        },
+      );
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -227,44 +264,38 @@ export default function HomePage() {
                             {isUser ? "You" : "AI"}
                           </div>
 
-                          <p className="whitespace-pre-wrap leading-6">
-                            {message.content}
-                          </p>
+                          {!isUser && !message.content.trim() && asking ? (
+                            <div className="mt-2">
+                              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                                Thinking
+                              </div>
 
-                          {!isUser &&
-                          message.content.trim() &&
-                          message.sources?.length ? (
-                            <SourceCitations
-                              sources={message.sources}
-                              onSourceClick={handleSourceClick}
-                            />
-                          ) : null}
+                              <div className="flex items-center gap-1.5">
+                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
+                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
+                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="whitespace-pre-wrap leading-6">
+                                {message.content}
+                              </p>
+
+                              {!isUser &&
+                              message.content.trim() &&
+                              message.sources?.length ? (
+                                <SourceCitations
+                                  sources={message.sources}
+                                  onSourceClick={handleSourceClick}
+                                />
+                              ) : null}
+                            </>
+                          )}
                         </div>
                       </div>
                     );
                   })
-                )}
-
-                {asking && (
-                  <div className="flex justify-start">
-                    <div className="flex max-w-[85%] items-end gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-stone-300 shadow-lg">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-300/20 text-[11px] font-semibold uppercase tracking-wide text-cyan-200">
-                        AI
-                      </div>
-
-                      <div>
-                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
-                          Thinking
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
-                          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
-                          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 )}
 
                 <div ref={messagesEndRef} />
