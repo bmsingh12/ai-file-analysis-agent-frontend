@@ -1,13 +1,20 @@
+import { AskQuestionRequest } from "@/app/lib/AskQuestionRequest";
 import { AskResponse } from "@/app/lib/AskResponse";
+import { CreateSessionResponse } from "@/app/lib/CreateSessionResponse";
 import { UploadResponse } from "@/app/lib/UploadResponse";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ||
+  "http://localhost:8000";
 
 function buildApiUrl(path: string): string {
   return `${API_URL}${path}`;
 }
 
-async function parseErrorResponse(res: Response, fallbackMessage: string): Promise<string> {
+async function parseErrorResponse(
+  res: Response,
+  fallbackMessage: string
+): Promise<string> {
   try {
     const data = await res.json();
 
@@ -22,15 +29,41 @@ async function parseErrorResponse(res: Response, fallbackMessage: string): Promi
 }
 
 /**
+ * Create a new chat session
+ */
+export async function createSession(): Promise<CreateSessionResponse> {
+  try {
+    const res = await fetch(buildApiUrl("/chat/session"), {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const message = await parseErrorResponse(
+        res,
+        res.statusText || "Request failed"
+      );
+      throw new Error(`Create session failed: ${message}`);
+    }
+
+    return res.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Create session failed: ${error.message}`);
+    }
+
+    throw new Error("Create session failed: Unable to reach the API server.");
+  }
+}
+
+/**
  * Upload a file to the backend
- * @param file File object
- * @returns UploadResponse
  */
 export async function uploadFile(file: File): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
-
-  console.log("Uploading file:", file.name, "size:", file.size);
 
   try {
     const res = await fetch(buildApiUrl("/upload"), {
@@ -39,7 +72,10 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     });
 
     if (!res.ok) {
-      const message = await parseErrorResponse(res, res.statusText || "Request failed");
+      const message = await parseErrorResponse(
+        res,
+        res.statusText || "Request failed"
+      );
       throw new Error(`Upload failed: ${message}`);
     }
 
@@ -54,25 +90,35 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
 }
 
 /**
- * Ask a question to the backend agent
- * @param question string
- * @returns AskResponse
+ * Ask a question using the current chat session
  */
-export async function askQuestion(question: string): Promise<AskResponse> {
-  const encodedQuestion = encodeURIComponent(question);
+export async function askQuestion(
+  payload: AskQuestionRequest
+): Promise<AskResponse> {
+  try {
+    const res = await fetch(buildApiUrl("/ask"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const res = await fetch(`${API_URL}/ask?question=${encodedQuestion}`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-  });
+    if (!res.ok) {
+      const message = await parseErrorResponse(
+        res,
+        res.statusText || "Request failed"
+      );
+      throw new Error(`Question failed: ${message}`);
+    }
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Question failed: ${res.status} ${errorText}`);
+    return res.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Question failed: ${error.message}`);
+    }
+
+    throw new Error("Question failed: Unable to reach the API server.");
   }
-
-  return res.json();
 }
-
