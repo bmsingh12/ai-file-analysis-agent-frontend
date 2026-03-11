@@ -278,18 +278,34 @@ export default function HomePage() {
                             </div>
                           ) : (
                             <>
-                              <p className="whitespace-pre-wrap leading-6">
-                                {message.content}
-                              </p>
+                              {!isUser && !message.content.trim() && asking ? (
+                                <div className="mt-2">
+                                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                                    Thinking
+                                  </div>
 
-                              {!isUser &&
-                              message.content.trim() &&
-                              message.sources?.length ? (
-                                <SourceCitations
-                                  sources={message.sources}
-                                  onSourceClick={handleSourceClick}
-                                />
-                              ) : null}
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
+                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
+                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="whitespace-pre-wrap leading-6">
+                                    {message.content}
+                                  </p>
+
+                                  {!isUser &&
+                                  message.content.trim() &&
+                                  message.sources?.length ? (
+                                    <SourceCitations
+                                      sources={message.sources}
+                                      onSourceClick={handleSourceClick}
+                                    />
+                                  ) : null}
+                                </>
+                              )}
                             </>
                           )}
                         </div>
