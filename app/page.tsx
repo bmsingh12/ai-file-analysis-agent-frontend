@@ -172,17 +172,6 @@ export default function HomePage() {
 
           if (event.type === "done") {
             setMessages(event.messages);
-
-            const latestAssistantMessage = [...event.messages]
-              .reverse()
-              .find(
-                (message) =>
-                  message.role === "assistant" && message.sources?.length,
-              );
-
-            if (latestAssistantMessage?.sources?.length) {
-              setSelectedSource(latestAssistantMessage.sources[0]);
-            }
           }
 
           if (event.type === "error") {
@@ -208,6 +197,7 @@ export default function HomePage() {
 
   const handleCloseViewer = () => {
     setIsViewerOpen(false);
+    setSelectedSource(null);
   };
 
   return (
@@ -301,6 +291,7 @@ export default function HomePage() {
                                   message.sources?.length ? (
                                     <SourceCitations
                                       sources={message.sources}
+                                      selectedSource={selectedSource}
                                       onSourceClick={handleSourceClick}
                                     />
                                   ) : null}
