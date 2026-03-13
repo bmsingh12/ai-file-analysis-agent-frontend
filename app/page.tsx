@@ -59,7 +59,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: asking ? "auto" : "smooth"  });
   }, [messages, asking]);
 
   const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -216,8 +216,8 @@ export default function HomePage() {
               onSubmit={handleUpload}
             />
 
-            <section className="flex min-h-[700px] flex-col rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-cyan-950/20 backdrop-blur-sm">
-              <div className="border-b border-white/10 px-6 py-5">
+            <section className="flex h-[calc(100vh-3rem)] min-h-175 flex-col rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-cyan-950/20 backdrop-blur-sm">
+              <div className="shrink-0 border-b border-white/10 px-6 py-5">
                 <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
                   Chat
                 </p>
@@ -229,88 +229,74 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-6">
-                {messages.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-8 text-center text-sm text-stone-400">
-                    Upload a document to begin, then ask your first question.
-                  </div>
-                ) : (
-                  messages.map((message, index) => {
-                    const isUser = message.role === "user";
+              <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+                <div className="space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-8 text-center text-sm text-stone-400">
+                      Upload a document to begin, then ask your first question.
+                    </div>
+                  ) : (
+                    messages.map((message, index) => {
+                      const isUser = message.role === "user";
 
-                    return (
-                      <div
-                        key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
-                        className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-                      >
+                      return (
                         <div
-                          className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-lg ${
-                            isUser
-                              ? "bg-cyan-300 text-slate-950"
-                              : "border border-white/10 bg-black/30 text-stone-100"
-                          }`}
+                          key={`${message.role}-${index}-${message.content.slice(0, 20)}`}
+                          className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                         >
-                          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">
-                            {isUser ? "You" : "AI"}
-                          </div>
-
-                          {!isUser && !message.content.trim() && asking ? (
-                            <div className="mt-2">
-                              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
-                                Thinking
-                              </div>
-
-                              <div className="flex items-center gap-1.5">
-                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
-                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
-                                <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
-                              </div>
+                          <div
+                            className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-lg ${
+                              isUser
+                                ? "bg-cyan-300 text-slate-950"
+                                : "border border-white/10 bg-black/30 text-stone-100"
+                            }`}
+                          >
+                            <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">
+                              {isUser ? "You" : "AI"}
                             </div>
-                          ) : (
-                            <>
-                              {!isUser && !message.content.trim() && asking ? (
-                                <div className="mt-2">
-                                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
-                                    Thinking
-                                  </div>
 
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
-                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
-                                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
-                                  </div>
+                            {!isUser && !message.content.trim() && asking ? (
+                              <div className="mt-2">
+                                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                                  Thinking
                                 </div>
-                              ) : (
-                                <>
-                                  <p className="whitespace-pre-wrap leading-6">
-                                    {message.content}
-                                  </p>
 
-                                  {!isUser &&
-                                  message.content.trim() &&
-                                  message.sources?.length ? (
-                                    <SourceCitations
-                                      sources={message.sources}
-                                      selectedSource={selectedSource}
-                                      onSourceClick={handleSourceClick}
-                                    />
-                                  ) : null}
-                                </>
-                              )}
-                            </>
-                          )}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.3s]" />
+                                  <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300 [animation-delay:-0.15s]" />
+                                  <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-cyan-300" />
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="whitespace-pre-wrap leading-6">
+                                  {message.content}
+                                </p>
+
+                                {!isUser &&
+                                message.content.trim() &&
+                                message.sources?.length ? (
+                                  <SourceCitations
+                                    sources={message.sources}
+                                    selectedSource={selectedSource}
+                                    onSourceClick={handleSourceClick}
+                                  />
+                                ) : null}
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
 
-                <div ref={messagesEndRef} />
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
 
               <form
                 onSubmit={handleAsk}
-                className="border-t border-white/10 px-6 py-5"
+                className="sticky bottom-0 shrink-0 rounded-b-3xl border-t border-white/10 bg-slate-950/80 px-6 py-5 backdrop-blur-xl"
               >
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <input
